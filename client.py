@@ -4,6 +4,12 @@
 # However, feel free to peruse to understand its functions.                   #
 ###############################################################################
 
+import sys
+# Python 3 verification
+if sys.version_info < (3, 0):
+    print('Please use Python 3.')
+    sys.exit(1)
+
 import argparse
 from datetime import datetime
 import json
@@ -12,7 +18,6 @@ import os
 from requests.packages.urllib3.util import Retry
 from requests.adapters import HTTPAdapter
 from requests import Session
-import sys
 import time
 
 LOCAL_URL = 'http://127.0.0.1:5000/api/'

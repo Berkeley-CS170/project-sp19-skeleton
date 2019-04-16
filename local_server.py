@@ -1,10 +1,15 @@
+import sys
+# Python 3 verification
+if sys.version_info < (3, 0):
+    print('Please use Python 3.')
+    sys.exit(1)
+
 import argparse
 from flask import Flask, jsonify, request
 import json
 import networkx as nx
 import os
 import random
-import sys
 
 app = Flask(__name__)
 
