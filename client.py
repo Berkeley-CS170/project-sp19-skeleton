@@ -8,7 +8,7 @@ import sys
 # Python 3 verification
 if sys.version_info < (3, 0):
     print('Please use Python 3.')
-    sys.exit(1)
+    sys.exit()
 
 import argparse
 from datetime import datetime
@@ -47,7 +47,7 @@ class Client:
 
         if self.submit:
             with open('group_token', 'r') as f:
-                self.group_token = f.readline()
+                self.group_token = f.readline().strip()
         self.__print__('Client initialized! '
             + ('Using group token {}.'.format(self.group_token) if self.submit \
                 else ''))
@@ -258,12 +258,13 @@ class Client:
 
         return True
 
-    ### Retrieves and saves your submit token, as well as informing about the
+    ### Retrieves your submit token, as well as informing about the
     ### number of evaluation rescues completed and remaining.
+    ### Saves the submit token if save is True.
     ### Returns a dictionary containing submit_token, completed, and remaining
     ### rescues.
     ### On error, returns None
-    def submission(self):
+    def submission(self, save=True):
         status_code, response = self.__request__('submission', {}, REMOTE_URL)
         if status_code in [400, 401, 403]:
             self.__print__('/submission API ' + str(status_code) + ' Error: '
@@ -274,17 +275,18 @@ class Client:
             self.__print__('/submission API ' + status_code + ' Error.')
             return
 
-        self.__print__('Submit Token: ' + response['submit_token'])
         self.__print__('Rescues Remaining: ' + str(response['completed']) + '/'
             + str(response['completed'] + response['remaining']))
 
-        filename = datetime.now().strftime(
-            'submit_tokens/submit_token_%y%m%d_%H%M%S.txt')
-        if not os.path.exists('submit_tokens'):
-            os.makedirs('submit_tokens')
-        with open(filename, 'w+') as f:
-            f.write(response['submit_token'])
-        self.__print__('Saved submit_token at ' + filename + '.')
+        if save:
+            filename = datetime.now().strftime(
+                'submit_tokens/submit_token_%y%m%d_%H%M%S.txt')
+            if not os.path.exists('submit_tokens'):
+                os.makedirs('submit_tokens')
+            with open(filename, 'w+') as f:
+                f.write(response['submit_token'])
+            self.__print__('Saved submit_token at ' + filename + '. Submit this on '
+                + 'Gradescope.')
 
         return {k: v for k, v in response.items() \
             if k in ['submit_token', 'completed', 'remaining']}
@@ -352,6 +354,13 @@ if __name__ == '__main__':
 
     if args.submit:
         submission = client.submission()
+        # Invalid group token check
+        if not submission:
+            print('Invalid group token.')
+            sys.exit()
+        if submission['remaining'] <= 0:
+            print('0 rescues remaining. Terminating.')
+            sys.exit()
         statement = 'I understand I only have ' + str(submission['remaining']) \
             + ' rescues remaining.'
         accept = input(
@@ -377,6 +386,9 @@ if __name__ == '__main__':
     solver = __import__(args.solver_file)
     if args.submit:
         for i in range(24):
+            if client.submission(save=False)['remaining'] <= 0:
+                print('0 rescues remaining. Terminating.')
+                sys.exit()
             client.__print__('Starting submission {}.'.format(i + 1))
             solver.solve(client)
             client.__print__('Finished submission {}.'.format(i + 1))
