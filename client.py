@@ -170,8 +170,6 @@ class Client:
             response['reports'].items()}
 
         self.time = response['time']
-        for student in students:
-            self.cant_scout[student].add(vertex)
 
         self.__print__('/scout API Call succeeded (v = ' + str(vertex)
             + ', s = ' + str(students) + ')! '
