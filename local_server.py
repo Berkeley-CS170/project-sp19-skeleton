@@ -116,8 +116,6 @@ def scout():
         # on success
         if data['correct'][student][vertex]:
             ret_data['reports'][student] = data['bots'][vertex] > 0
-            # vertex cannot be scouted by student anymore
-            data['forbidden_scouts'][student].add(vertex)
         else:
             ret_data['reports'][student] = not (data['bots'][vertex] > 0)
 
