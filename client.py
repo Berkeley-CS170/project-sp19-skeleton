@@ -273,7 +273,7 @@ class Client:
             self.__print__('/submission API ' + status_code + ' Error.')
             return
 
-        self.__print__('Rescues Remaining: ' + str(response['completed']) + '/'
+        self.__print__('Rescues Remaining: ' + str(response['remaining']) + '/'
             + str(response['completed'] + response['remaining']))
 
         if save:
